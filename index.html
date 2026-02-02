@@ -3,195 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Neural Verification | Global Access</title>
+    <title>X-CORE | Neural Defense Wall</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --accent: #3b82f6; }
+        :root { --p-blue: #3b82f6; --p-cyan: #22d3ee; }
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #020203;
-            color: #f8fafc;
+            font-family: 'Space Grotesk', sans-serif;
+            background: #000;
+            color: #fff;
             overflow: hidden;
+            cursor: crosshair;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        canvas { position: fixed; top: 0; left: 0; z-index: -1; }
+        .cyber-glass {
+            background: rgba(8, 10, 15, 0.8);
+            backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(59, 130, 246, 0.05);
         }
-        .scan-line {
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            position: absolute;
+        .scan-anim {
+            background: linear-gradient(to bottom, transparent 0%, var(--p-blue) 50%, transparent 100%);
+            height: 100px;
             width: 100%;
-            top: 0;
-            animation: scan 2s linear infinite;
-            z-index: 10;
+            position: absolute;
+            opacity: 0.2;
+            animation: moveScan 3s linear infinite;
         }
-        @keyframes scan {
-            0% { top: 0% } 100% { top: 100% }
+        @keyframes moveScan { 0% { top: -100px; } 100% { top: 100%; } }
+        .pixel-grid {
+            background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 0);
+            background-size: 30px 30px;
         }
-        .step-exit { transform: translateX(-20px); opacity: 0; filter: blur(10px); }
-        .step-enter { transform: translateX(20px); opacity: 0; filter: blur(10px); }
-        .active-step { transform: translateX(0); opacity: 1; filter: blur(0); }
-        
-        video { transform: scaleX(-1); border-radius: 1rem; }
+        .status-dot { animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .shimmer-text {
+            background: linear-gradient(90deg, #fff, #4b5563, #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+        @keyframes shine { to { background-position: 200% center; } }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
+<body class="min-h-screen flex items-center justify-center p-4 pixel-grid">
 
-    <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,#1e1b4b_0%,#020203_100%)]"></div>
-    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-64 bg-blue-500/10 blur-[120px] rounded-full"></div>
+    <canvas id="neuralCanvas"></canvas>
 
-    <div id="app" class="w-full max-w-lg">
-        <div id="success" class="hidden text-center space-y-8">
-            <div class="relative inline-block">
-                <div class="absolute inset-0 bg-blue-500 blur-3xl opacity-20 animate-pulse"></div>
-                <div class="w-24 h-24 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center relative">
-                    <i data-lucide="shield-check" class="w-12 h-12 text-blue-400"></i>
-                </div>
-            </div>
-            <div class="space-y-2">
-                <h2 class="text-4xl font-bold tracking-tight bg-gradient-to-b from-white to-gray-500 bg-clip-text text-transparent">Identity Confirmed</h2>
-                <p class="text-gray-400">Access granted to Secure Neural Network</p>
-            </div>
-            <button onclick="location.reload()" class="px-10 py-4 bg-white text-black font-bold rounded-2xl hover:scale-105 transition-all shadow-xl">Initialize Workspace</button>
+    <div id="portal" class="w-full max-w-xl relative">
+        <div class="absolute -top-12 left-0 right-0 flex justify-between px-4 text-[10px] font-mono tracking-[0.4em] text-blue-500/60 uppercase">
+            <span>Terminal: X-882</span>
+            <span>Uptime: 99.9%</span>
+            <span>Encryption: AES-512</span>
         </div>
 
-        <div id="card" class="glass-card rounded-[2.5rem] p-10 relative overflow-hidden transition-all duration-700">
-            
-            <div class="flex items-center justify-between mb-10">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                        <i data-lucide="fingerprint" class="w-6 h-6 text-blue-500"></i>
-                    </div>
-                    <h1 class="text-xl font-semibold tracking-tight uppercase text-sm">Human Wall <span class="text-gray-600">v4.0</span></h1>
+        <div id="success" class="hidden text-center space-y-10 py-20">
+            <div class="relative inline-block">
+                <div class="absolute inset-0 bg-cyan-500 blur-[100px] opacity-30"></div>
+                <div class="w-32 h-32 rounded-3xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center rotate-45 scale-110">
+                    <i data-lucide="unlock" class="w-16 h-16 text-cyan-400 -rotate-45"></i>
                 </div>
-                <div id="stepCounter" class="text-xs font-mono text-gray-500">STEP 01/03</div>
+            </div>
+            <div class="space-y-4">
+                <h2 class="text-5xl font-bold tracking-tighter shimmer-text uppercase">Firewall Bypassed</h2>
+                <p class="text-gray-400 font-light tracking-widest uppercase text-xs">Access Level: Administrator Granted</p>
+            </div>
+        </div>
+
+        <div id="card" class="cyber-glass rounded-[40px] p-12 transition-all duration-700">
+            
+            <div class="flex items-center gap-4 mb-12">
+                <div class="flex-1 space-y-2">
+                    <div class="flex justify-between text-[10px] font-bold text-gray-500 tracking-widest uppercase">
+                        <span id="stepTitle">Biometric Init</span>
+                        <span id="percentage">33%</span>
+                    </div>
+                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div id="pBar" class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 w-1/3 transition-all duration-1000"></div>
+                    </div>
+                </div>
+                <div class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center">
+                    <i data-lucide="cpu" class="w-5 h-5 text-blue-500 animate-spin-slow"></i>
+                </div>
             </div>
 
-            <div id="stepContainer" class="relative min-h-[320px]">
-                
-                <div id="step1" class="transition-all duration-500 space-y-6">
-                    <h2 class="text-3xl font-bold">Voice Emotion Analysis</h2>
-                    <p class="text-gray-400 leading-relaxed">Say "I am not a machine" clearly. Our AI will detect natural human vocal vibrations and emotional markers.</p>
-                    <div class="py-10 flex flex-col items-center gap-4">
-                        <button onclick="nextStep(1)" class="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center group hover:bg-red-500/20 transition-all cursor-pointer">
-                            <i data-lucide="mic" class="w-8 h-8 text-red-500 group-hover:scale-110 transition-transform"></i>
+            <div id="stepContainer" class="min-h-[350px] flex flex-col justify-center">
+                <div id="step1" class="space-y-8 animate-in">
+                    <div class="space-y-2">
+                        <h3 class="text-3xl font-medium tracking-tight">Audio Fingerprint</h3>
+                        <p class="text-gray-500">Decrypt the phrase: <span class="text-blue-400 underline decoration-dotted">"Protocol Sigma 72"</span></p>
+                    </div>
+                    <div class="p-8 border border-white/5 rounded-[30px] bg-white/[0.02] flex items-center justify-center relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <button onclick="handleStep(1)" class="relative z-10 flex flex-col items-center gap-4">
+                            <div class="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+                                <i data-lucide="mic-2" class="w-8 h-8"></i>
+                            </div>
+                            <span class="text-[10px] font-bold tracking-widest text-blue-400">RECORDING...</span>
                         </button>
-                        <span class="text-xs font-mono text-red-500/60 uppercase tracking-widest animate-pulse">Click to record</span>
                     </div>
                 </div>
 
-                <div id="step2" class="hidden step-enter transition-all duration-500 space-y-6">
-                    <h2 class="text-3xl font-bold">Neural Face Scan</h2>
-                    <div class="relative w-full aspect-square max-w-[280px] mx-auto overflow-hidden rounded-3xl border border-white/10 bg-black">
-                        <div class="scan-line"></div>
-                        <video id="webcam" autoplay playsinline class="w-full h-full object-cover grayscale opacity-70"></video>
-                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div class="w-48 h-48 border border-blue-500/30 rounded-full animate-[ping_3s_infinite]"></div>
+                <div id="step2" class="hidden space-y-8">
+                    <div class="space-y-2 text-center">
+                        <h3 class="text-3xl font-medium">Neural Scan</h3>
+                        <p class="text-gray-500">Matching face-mesh with global satellite data</p>
+                    </div>
+                    <div class="relative w-full aspect-video rounded-[30px] overflow-hidden border border-white/10">
+                        <div class="scan-anim"></div>
+                        <video id="webcam" autoplay playsinline class="w-full h-full object-cover"></video>
+                        <div class="absolute bottom-4 left-4 flex gap-2">
+                            <div class="px-3 py-1 bg-black/60 rounded-full text-[10px] flex items-center gap-2">
+                                <span class="w-2 h-2 bg-red-500 rounded-full status-dot"></span> LIVE FEED
+                            </div>
                         </div>
                     </div>
-                    <p class="text-sm text-center text-gray-500">Position your face in the center and smile</p>
-                    <button id="scanBtn" onclick="nextStep(2)" class="w-full py-4 bg-blue-600 rounded-2xl font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">Start Biometric Scan</button>
+                    <button onclick="handleStep(2)" class="w-full py-5 bg-white text-black font-bold rounded-2xl tracking-widest uppercase text-xs hover:bg-cyan-400 transition-all">Verify Bio-ID</button>
                 </div>
 
-                <div id="step3" class="hidden step-enter transition-all duration-500 space-y-6">
-                    <h2 class="text-3xl font-bold">Pattern Logic</h2>
-                    <p class="text-gray-400">Humans perceive abstract patterns. Select the <strong>Lucide Icon</strong> representing 'Cloud' among these emojis.</p>
-                    <div class="grid grid-cols-3 gap-4 py-4">
-                        <button onclick="nextStep(3)" class="p-6 glass-card rounded-2xl hover:border-blue-500/50 transition-all flex items-center justify-center">
-                           <i data-lucide="cloud" class="w-8 h-8 text-white"></i>
+                <div id="step3" class="hidden space-y-8">
+                    <div class="space-y-2">
+                        <h3 class="text-3xl font-medium">Quantum Gate</h3>
+                        <p class="text-gray-500">Select the anomaly in the data stream</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="handleStep(3)" class="p-10 border border-white/10 rounded-3xl hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all group">
+                            <i data-lucide="box" class="w-10 h-10 mx-auto text-gray-600 group-hover:text-cyan-400"></i>
+                            <div class="mt-4 text-[10px] text-gray-600 uppercase">Packet A-9</div>
                         </button>
-                        <button class="p-6 glass-card rounded-2xl hover:bg-red-500/10 transition-all flex items-center justify-center">
-                            <span class="text-2xl">🔥</span>
-                        </button>
-                        <button class="p-6 glass-card rounded-2xl hover:bg-red-500/10 transition-all flex items-center justify-center">
-                            <span class="text-2xl">🚗</span>
+                        <button onclick="handleStep(3)" class="p-10 border border-white/10 rounded-3xl hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all group">
+                            <i data-lucide="triangle" class="w-10 h-10 mx-auto text-gray-600 group-hover:text-cyan-400"></i>
+                            <div class="mt-4 text-[10px] text-gray-600 uppercase">Packet B-2</div>
                         </button>
                     </div>
                 </div>
-
             </div>
 
-            <div class="mt-12 flex gap-1.5 h-1">
-                <div id="prog1" class="flex-1 bg-blue-500 rounded-full transition-all duration-500"></div>
-                <div id="prog2" class="flex-1 bg-white/10 rounded-full transition-all duration-500"></div>
-                <div id="prog3" class="flex-1 bg-white/10 rounded-full transition-all duration-500"></div>
+            <div class="mt-12 flex justify-between items-center opacity-30 text-[9px] font-mono tracking-widest uppercase">
+                <div class="flex gap-4">
+                    <span>IP: 192.168.0.1</span>
+                    <span>Lat: 28.61</span>
+                </div>
+                <div>X-CORE SYSTEMS © 2026</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Initialize Icons
         lucide.createIcons();
 
-        async function startWebcam() {
-            const video = document.getElementById('webcam');
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-            } catch (err) {
-                console.error("Camera error: ", err);
-                alert("Please enable camera for face verification");
+        // --- BACKGROUND CANVAS PARTICLES ---
+        const canvas = document.getElementById('neuralCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.4)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
             }
         }
 
-        function stopWebcam() {
-            const video = document.getElementById('webcam');
-            const stream = video.srcObject;
-            if (stream) {
-                const tracks = stream.getTracks();
-                tracks.forEach(track => track.stop());
-            }
+        function init() {
+            for (let i = 0; i < 100; i++) particles.push(new Particle());
         }
 
-        function nextStep(current) {
-            const currentEl = document.getElementById(`step${current}`);
-            const nextEl = document.getElementById(`step${current + 1}`);
-            const card = document.getElementById('card');
-            const success = document.getElementById('success');
-            
-            // Loading state on buttons
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        init(); animate();
+
+        // --- CORE LOGIC ---
+        let current = 1;
+
+        async function handleStep(s) {
             const btn = event.currentTarget;
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>`;
-            btn.disabled = true;
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.5';
 
+            // Start Camera for Step 2
+            if (s === 1) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    document.getElementById('webcam').srcObject = stream;
+                } catch (e) { console.log("Camera access denied"); }
+            }
+
+            // Simulate "Neural Processing"
             setTimeout(() => {
                 if (current < 3) {
-                    // Transition Logic
-                    currentEl.classList.add('step-exit');
-                    
-                    setTimeout(() => {
-                        currentEl.classList.add('hidden');
-                        nextEl.classList.remove('hidden');
-                        
-                        // Start camera if next step is 2
-                        if (current + 1 === 2) startWebcam();
-                        if (current === 2) stopWebcam();
-
-                        setTimeout(() => {
-                            nextEl.classList.remove('step-enter');
-                            nextEl.classList.add('active-step');
-                            document.getElementById(`prog${current + 1}`).classList.replace('bg-white/10', 'bg-blue-500');
-                            document.getElementById('stepCounter').innerText = `STEP 0${current + 1}/03`;
-                        }, 50);
-                    }, 500);
+                    transition(current, current + 1);
+                    current++;
+                    updateUI();
                 } else {
-                    // Final Success
-                    card.classList.add('scale-90', 'opacity-0');
-                    setTimeout(() => {
-                        card.classList.add('hidden');
-                        success.classList.remove('hidden');
-                        lucide.createIcons();
-                    }, 600);
+                    finalAuth();
                 }
             }, 1500);
         }
+
+        function transition(from, to) {
+            const f = document.getElementById(`step${from}`);
+            const t = document.getElementById(`step${to}`);
+            
+            f.style.opacity = '0';
+            f.style.transform = 'translateY(-20px) scale(0.95)';
+            
+            setTimeout(() => {
+                f.classList.add('hidden');
+                t.classList.remove('hidden');
+                setTimeout(() => {
+                    t.style.opacity = '1';
+                    t.style.transform = 'translateY(0) scale(1)';
+                    lucide.createIcons();
+                }, 50);
+            }, 500);
+        }
+
+        function updateUI() {
+            const titles = ["Audio Fingerprint", "Neural Face Scan", "Quantum Gate"];
+            document.getElementById('stepTitle').innerText = titles[current-1];
+            document.getElementById('pBar').style.width = (current * 33.3) + "%";
+            document.getElementById('percentage').innerText = Math.round(current * 33.3) + "%";
+        }
+
+        function finalAuth() {
+            const card = document.getElementById('card');
+            const success = document.getElementById('success');
+            card.style.transform = 'scale(0.8) translateY(100px)';
+            card.style.opacity = '0';
+            
+            // Stop Camera
+            const stream = document.getElementById('webcam').srcObject;
+            if (stream) stream.getTracks().forEach(t => t.stop());
+
+            setTimeout(() => {
+                card.classList.add('hidden');
+                success.classList.remove('hidden');
+                lucide.createIcons();
+            }, 700);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
     </script>
 </body>
 </html>
