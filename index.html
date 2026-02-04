@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT Project | Whitelist</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="glass-card">
+            <h1>NFT WHITELIST</h1>
+            <p>Complete the tasks to join the squad</p>
+            
+            <form id="whitelistForm">
+                <div class="input-group">
+                    <label>X (Twitter) Username</label>
+                    <input type="text" id="x_username" placeholder="@yourname" required>
+                </div>
+                <div class="input-group">
+                    <label>Comment Link</label>
+                    <input type="url" id="x_comment" placeholder="https://x.com/..." required>
+                </div>
+                <div class="input-group">
+                    <label>EVM Wallet Address</label>
+                    <input type="text" id="wallet" placeholder="0x..." required>
+                </div>
+                <button type="submit" id="submitBtn">JOIN WHITELIST</button>
+            </form>
+            <div id="status"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
