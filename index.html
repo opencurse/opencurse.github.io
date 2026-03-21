@@ -1,268 +1,241 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum v2 | Pro Calculator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #000000;
-            --card-bg: rgba(10, 10, 10, 0.8);
-            --accent: #ffffff;
-            --accent-dim: #888888;
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --neon-blue: #0070f3; /* Next.js Blue */
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusView Pro | Universal File Previewer</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
-        * {
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+  <style>
+    :root { --bg-color: #050505; }
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: #e5e5e5; overflow-x: hidden; }
+    
+    .glass-panel { 
+      background: rgba(15, 15, 15, 0.7); 
+      backdrop-filter: blur(20px); 
+      border: 1px solid rgba(255, 255, 255, 0.08); 
+    }
 
-        body {
-            background-color: var(--bg);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(0, 112, 243, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(255, 0, 128, 0.05) 0px, transparent 50%);
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
+    .img-checkerboard { 
+      background-image: linear-gradient(45deg, #111 25%, transparent 25%), linear-gradient(-45deg, #111 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #111 75%), linear-gradient(-45deg, transparent 75%, #111 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
 
-        .calc-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 0 80px rgba(0,0,0,0.5);
-        }
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #444; }
 
-        /* Mobile Optimization */
-        @media (max-width: 480px) {
-            .calc-container {
-                max-width: 90%;
-                padding: 15px;
-            }
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 10px 20px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent-dim);
-        }
-
-        .status-dot {
-            height: 8px;
-            width: 8px;
-            background: var(--neon-blue);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        .display-area {
-            margin-bottom: 25px;
-            padding: 10px;
-            text-align: right;
-        }
-
-        #history {
-            font-size: 0.9rem;
-            color: var(--accent-dim);
-            height: 20px;
-            margin-bottom: 5px;
-        }
-
-        #main-display {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: var(--accent);
-            font-size: 3.5rem;
-            font-weight: 300;
-            text-align: right;
-            outline: none;
-            cursor: default;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
-        button {
-            aspect-ratio: 1/1;
-            border-radius: 18px;
-            border: 1px solid transparent;
-            background: rgba(255, 255, 255, 0.03);
-            color: var(--accent);
-            font-size: 1.25rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        button:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--glass-border);
-            transform: scale(1.05);
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        .op-btn {
-            color: var(--neon-blue);
-            font-weight: 600;
-            background: rgba(0, 112, 243, 0.05);
-        }
-
-        .special-btn {
-            color: #ff0080;
-        }
-
-        .eq-btn {
-            background: var(--accent);
-            color: #000;
-            grid-column: span 2;
-            aspect-ratio: auto;
-            font-weight: 600;
-        }
-
-        .eq-btn:hover {
-            background: #e0e0e0;
-            color: #000;
-        }
-
-        /* Keyboard Focus Style */
-        .key-active {
-            background: rgba(255, 255, 255, 0.2) !important;
-            transform: scale(0.95);
-        }
-    </style>
+    pre code { font-family: 'Fira Code', monospace !important; font-size: 13px !important; line-height: 1.6; }
+    
+    .drop-active { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.05) !important; scale: 0.99; }
+  </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
 
-<div class="calc-container">
-    <div class="header">
-        <span>Quantum Compute</span>
-        <div class="status-dot"></div>
+  <header class="w-full max-w-6xl flex flex-col md:flex-row justify-between items-center gap-6 mb-10">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+        <i data-lucide="zap" class="text-white fill-white w-6 h-6"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold tracking-tighter">Nexus<span class="text-blue-500">View</span></h1>
+        <div id="statusBadge" class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          <p id="metaInfo" class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">System Ready</p>
+        </div>
+      </div>
     </div>
 
-    <div class="display-area">
-        <div id="history"></div>
-        <input type="text" id="main-display" readonly placeholder="0">
+    <div class="flex items-center gap-2 bg-neutral-900/50 p-1.5 rounded-xl border border-white/5 w-full md:w-auto">
+      <input id="shareLink" placeholder="File URL will appear here..." class="bg-transparent text-xs px-4 py-2 w-full md:w-64 focus:outline-none text-gray-400" readonly>
+      <button onclick="copyLink()" id="copyBtn" class="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-lg font-bold text-xs hover:bg-blue-500 hover:text-white transition-all active:scale-95">
+        <i data-lucide="copy" class="w-3.5 h-3.5"></i> COPY
+      </button>
+    </div>
+  </header>
+
+  <main id="dropZone" class="w-full max-w-6xl glass-panel rounded-[2rem] overflow-hidden shadow-2xl min-h-[70vh] flex flex-col relative transition-all duration-500 group">
+    
+    <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center z-10">
+      <div class="relative mb-6">
+        <div class="absolute inset-0 bg-blue-500 blur-3xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
+        <div class="bg-neutral-800/50 p-8 rounded-3xl border border-white/10 relative group-hover:-translate-y-2 transition-transform duration-500">
+           <i data-lucide="plus-square" class="w-16 h-16 text-blue-500"></i>
+        </div>
+      </div>
+      <h2 class="text-xl font-medium text-white mb-2">Drop it like it's hot</h2>
+      <p class="text-gray-500 text-sm mb-6 text-center max-w-xs">Drag files here, paste a GitHub link in the URL, or click to browse local storage.</p>
+      
+      <button onclick="document.getElementById('fileInput').click()" class="bg-white/5 border border-white/10 hover:bg-white/10 px-6 py-3 rounded-full text-sm font-semibold transition-all">
+        Browse Files
+      </button>
+      <input type="file" id="fileInput" class="hidden" />
     </div>
 
-    <div class="grid">
-        <button class="special-btn" onclick="clearAll()">AC</button>
-        <button class="op-btn" onclick="insert('**')">xʸ</button>
-        <button class="op-btn" onclick="sqRoot()">√</button>
-        <button class="op-btn" onclick="insert('/')">÷</button>
+    <div id="viewerContent" class="hidden w-full h-full flex-grow flex flex-col">
+       </div>
 
-        <button onclick="insert('7')">7</button>
-        <button onclick="insert('8')">8</button>
-        <button onclick="insert('9')">9</button>
-        <button class="op-btn" onclick="insert('*')">×</button>
+  </main>
 
-        <button onclick="insert('4')">4</button>
-        <button onclick="insert('5')">5</button>
-        <button onclick="insert('6')">6</button>
-        <button class="op-btn" onclick="insert('-')">−</button>
-
-        <button onclick="insert('1')">1</button>
-        <button onclick="insert('2')">2</button>
-        <button onclick="insert('3')">3</button>
-        <button class="op-btn" onclick="insert('+')">+</button>
-
-        <button onclick="insert('0')">0</button>
-        <button onclick="insert('.')">.</button>
-        <button class="eq-btn" onclick="calculate()">=</button>
+  <footer class="mt-12 flex flex-col items-center gap-2 opacity-40 hover:opacity-100 transition-opacity">
+    <div class="flex gap-4 text-[10px] font-bold tracking-widest uppercase">
+      <span>Images</span> • <span>Videos</span> • <span>Code</span> • <span>PDFs</span> • <span>Markdown</span>
     </div>
-</div>
+    <p class="text-[10px]">NexusView Engine &bull; 2026 Edition</p>
+  </footer>
 
-<script>
-    const display = document.getElementById('main-display');
-    const historyDisp = document.getElementById('history');
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const dropZone = document.getElementById("dropZone");
+    const fileInput = document.getElementById("fileInput");
+    const viewerContent = document.getElementById("viewerContent");
+    const emptyState = document.getElementById("emptyState");
+    const metaInfo = document.getElementById("metaInfo");
+    const shareLink = document.getElementById("shareLink");
 
-    function insert(val) {
-        if (display.value === 'Error') clearAll();
-        display.value += val;
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // 1. URL LOGIC (Original Feature)
+    let urlFile = params.get("q") || params.get("file");
+    if (urlFile) {
+      if (urlFile.includes("github.com") && !urlFile.includes("raw.githubusercontent.com")) {
+        urlFile = urlFile.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+      }
+      shareLink.value = window.location.href;
+      processRemoteFile(urlFile);
     }
 
-    function clearAll() {
-        display.value = '';
-        historyDisp.innerText = '';
-    }
-
-    function backspace() {
-        display.value = display.value.slice(0, -1);
-    }
-
-    function sqRoot() {
-        if(!display.value) return;
-        historyDisp.innerText = `√(${display.value})`;
-        display.value = Math.sqrt(eval(display.value)).toFixed(4).replace(/\.?0+$/, "");
-    }
-
-    function calculate() {
-        try {
-            if(!display.value) return;
-            let expression = display.value;
-            historyDisp.innerText = expression + " =";
-            // Safety: Using Function instead of eval for better context
-            let result = new Function('return ' + expression)();
-            display.value = Number.isInteger(result) ? result : result.toFixed(4).replace(/\.?0+$/, "");
-        } catch (e) {
-            display.value = 'Error';
-        }
-    }
-
-    // --- PC KEYBOARD LOGIC ---
-    window.addEventListener('keydown', (e) => {
-        const key = e.key;
-
-        // Numbers & Basic Operators
-        if (/[0-9]/.test(key)) insert(key);
-        if (key === '+') insert('+');
-        if (key === '-') insert('-');
-        if (key === '*') insert('*');
-        if (key === '/') insert('/');
-        if (key === '.') insert('.');
-        if (key === '^') insert('**'); // x to power y
-        
-        // Actions
-        if (key === 'Enter' || key === '=') {
-            e.preventDefault(); // prevent form submit
-            calculate();
-        }
-        if (key === 'Backspace') backspace();
-        if (key === 'Escape') clearAll();
+    // 2. DRAG & DROP LOGIC (New Feature)
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
+      dropZone.addEventListener(e, (evt) => {
+        evt.preventDefault();
+        evt.stopPropagation();
+      }, false);
     });
 
-    // Handle Paste Support
-    window.addEventListener('paste', (e) => {
-        const pasteData = (e.clipboardData || window.clipboardData).getData('text');
-        if (/^[0-9+\-*/.**()]+$/.test(pasteData)) {
-            display.value += pasteData;
-        }
+    ['dragenter', 'dragover'].forEach(e => {
+      dropZone.addEventListener(e, () => dropZone.classList.add('drop-active'));
     });
-</script>
 
+    ['dragleave', 'drop'].forEach(e => {
+      dropZone.addEventListener(e, () => dropZone.classList.remove('drop-active'));
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const file = e.dataTransfer.files[0];
+      if(file) processLocalFile(file);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if(e.target.files[0]) processLocalFile(e.target.files[0]);
+    });
+
+    // 3. PROCESSING ENGINES
+    async function processRemoteFile(url) {
+      showLoading();
+      const ext = url.split('.').pop().toLowerCase().split(/[#?]/)[0];
+      const name = decodeURIComponent(url.split('/').pop().split(/[#?]/)[0]);
+      
+      if (url.match(/\.(jpg|jpeg|png|gif|webp|svg|avif)$/i)) renderImage(url, name);
+      else if (url.match(/\.(mp4|webm|ogg)$/i)) renderVideo(url, name);
+      else if (url.match(/\.(mp3|wav|m4a)$/i)) renderAudio(url, name);
+      else if (url.match(/\.(pdf)$/i)) renderPDF(url, name);
+      else renderCode(url, ext, name);
+    }
+
+    function processLocalFile(file) {
+      showLoading();
+      const ext = file.name.split('.').pop().toLowerCase();
+      const url = URL.createObjectURL(file);
+      
+      if (file.type.startsWith('image/')) renderImage(url, file.name);
+      else if (file.type.startsWith('video/')) renderVideo(url, file.name);
+      else if (file.type.startsWith('audio/')) renderAudio(url, file.name);
+      else if (file.type === 'application/pdf') renderPDF(url, file.name);
+      else {
+        const reader = new FileReader();
+        reader.onload = (e) => renderText(e.target.result, ext, file.name);
+        reader.readAsText(file);
+      }
+    }
+
+    // 4. RENDERING FUNCTIONS
+    function showLoading() {
+      emptyState.classList.add('hidden');
+      viewerContent.classList.remove('hidden');
+      viewerContent.innerHTML = `<div class="flex-grow flex items-center justify-center"><div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>`;
+    }
+
+    function renderImage(src, name) {
+      metaInfo.innerText = `Image View | ${name}`;
+      viewerContent.innerHTML = `
+        <div class="img-checkerboard flex-grow flex items-center justify-center p-8">
+          <img src="${src}" class="max-w-full max-h-[75vh] object-contain shadow-2xl rounded-lg">
+        </div>`;
+    }
+
+    function renderVideo(src, name) {
+      metaInfo.innerText = `Video Player | ${name}`;
+      viewerContent.innerHTML = `<video src="${src}" controls autoplay class="w-full h-full bg-black"></video>`;
+    }
+
+    function renderAudio(src, name) {
+      metaInfo.innerText = `Audio Player | ${name}`;
+      viewerContent.innerHTML = `
+        <div class="flex-grow flex flex-col items-center justify-center p-20 gap-8">
+          <div class="bg-blue-500/10 p-12 rounded-full ring-1 ring-blue-500/20"><i data-lucide="music" class="w-20 h-20 text-blue-500"></i></div>
+          <audio src="${src}" controls class="w-full max-w-md"></audio>
+        </div>`;
+      lucide.createIcons();
+    }
+
+    function renderPDF(src, name) {
+      metaInfo.innerText = `PDF Document | ${name}`;
+      viewerContent.innerHTML = `<iframe src="${src}" class="w-full h-[85vh] border-none"></iframe>`;
+    }
+
+    async function renderCode(url, ext, name) {
+      try {
+        const res = await fetch(url);
+        const text = await res.text();
+        renderText(text, ext, name);
+      } catch (err) {
+        viewerContent.innerHTML = `<div class="p-20 text-red-500">CORS Error: Cannot fetch remote code. Try downloading and dropping the file.</div>`;
+      }
+    }
+
+    function renderText(content, ext, name) {
+      metaInfo.innerText = `Code Editor | ${name}`;
+      const safe = content.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+      viewerContent.innerHTML = `
+        <div class="bg-[#1a1b26] px-6 py-3 border-b border-white/5 flex justify-between items-center">
+          <span class="text-[10px] font-black uppercase tracking-tighter text-blue-400">${ext} source</span>
+          <div class="flex gap-2"><div class="w-2.5 h-2.5 rounded-full bg-neutral-800"></div><div class="w-2.5 h-2.5 rounded-full bg-neutral-800"></div></div>
+        </div>
+        <div class="flex-grow overflow-auto custom-scrollbar bg-[#1a1b26]">
+          <pre class="m-0"><code class="language-${ext}">${safe}</code></pre>
+        </div>`;
+      hljs.highlightAll();
+    }
+
+    function copyLink() {
+      if(!shareLink.value) return;
+      navigator.clipboard.writeText(shareLink.value);
+      const btn = document.getElementById('copyBtn');
+      btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> DONE`;
+      lucide.createIcons();
+      setTimeout(() => { btn.innerHTML = `<i data-lucide="copy" class="w-3.5 h-3.5"></i> COPY`; lucide.createIcons(); }, 2000);
+    }
+  </script>
 </body>
 </html>
