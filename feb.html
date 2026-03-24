@@ -3,190 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FibRatio | Ultimate Dashboard</title>
+    <title>Fibonacci Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.2);
+        }
         body {
             font-family: 'Geist', sans-serif;
-            background-color: #000;
+            background-color: #050505;
             color: #fff;
             overflow: hidden;
+            height: 100vh;
         }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-
-        .glass {
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        /* Aurora Background */
+        .aurora {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 0% 0%, #1e1b4b 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, #312e81 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, #000 0%, transparent 100%);
         }
-
-        .dropdown-content {
-            display: none;
-            animation: slideUp 0.2s ease-out;
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        
-        .dropdown-content.show { display: block; }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .bento-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
-
-        .history-item {
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-        .history-item:hover {
+        .bento-card:hover {
+            border-color: var(--accent);
             background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
         }
-
-        input {
-            background: transparent !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            transition: all 0.3s;
+        /* Custom Dropdown Animation */
+        #dropMenu {
+            transform-origin: top;
+            transition: all 0.2s ease-out;
+            display: none;
         }
-        input:focus {
-            border-color: #6366f1 !important;
-            outline: none;
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+        #dropMenu.open {
+            display: grid;
+            animation: grow 0.2s ease-out forwards;
+        }
+        @keyframes grow {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        /* Mobile vs PC Layout */
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; overflow-y: auto; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+            body { overflow-y: auto; }
         }
     </style>
 </head>
-<body class="flex h-screen">
+<body class="flex main-container">
+    <div class="aurora"></div>
 
-    <aside class="w-80 glass flex flex-col p-6 hidden md:flex">
-        <div class="flex items-center gap-3 mb-10">
-            <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
-            <h2 class="text-xs font-black tracking-[0.3em] text-gray-400">LOG HISTORY</h2>
-        </div>
-        
-        <div id="historyList" class="flex-1 overflow-y-auto space-y-3">
-            <p id="emptyMsg" class="text-gray-600 text-xs italic">No calculations yet...</p>
+    <aside class="w-80 sidebar glass-panel p-6 flex flex-col gap-8 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span class="font-black text-xl italic">Φ</span>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold tracking-tighter">QUANTUM.FI</h1>
+                <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">Premium Engine</p>
+            </div>
         </div>
 
-        <div class="mt-auto pt-6 border-t border-white/5">
-            <p class="text-[10px] text-gray-500 font-mono italic">Session: Stable v4.0.2</p>
+        <div class="flex-1 flex flex-col gap-4 overflow-hidden">
+            <div class="flex justify-between items-center px-2">
+                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">History Log</span>
+                <button onclick="clearHistory()" class="text-[10px] text-gray-600 hover:text-red-400 transition-colors uppercase font-bold">Clear</button>
+            </div>
+            <div id="historyList" class="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-hide">
+                <div class="text-gray-700 text-xs p-4 text-center border border-dashed border-white/5 rounded-xl">No active sessions</div>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 mt-auto">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-xs font-medium text-gray-400">System Online</span>
+            </div>
         </div>
     </aside>
 
-    <main class="flex-1 relative flex items-center justify-center p-6 overflow-hidden">
-        
-        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px]"></div>
-        <div class="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px]"></div>
-
-        <div class="max-w-xl w-full z-10">
-            <div class="mb-12">
-                <h1 class="text-5xl font-extrabold tracking-tighter leading-none mb-4">
-                    Deep <span class="text-indigo-500">Analytics.</span>
-                </h1>
-                <p class="text-gray-400 text-lg font-light">Precision Fibonacci mapping & root extraction.</p>
-            </div>
-
-            <div class="space-y-8">
-                <div class="relative">
-                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 block">Select Target Ratio</label>
-                    <button onclick="toggleDropdown()" id="dropdownBtn" class="w-full h-16 bg-white/5 border border-white/10 rounded-2xl px-6 flex items-center justify-between hover:bg-white/10 transition-all">
-                        <span id="selectedValue" class="font-medium text-indigo-400">0.618 (Golden Ratio)</span>
-                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
+    <main class="flex-1 p-4 md:p-12 overflow-y-auto">
+        <div class="max-w-4xl mx-auto w-full">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="md:col-span-2 bento-card p-8 rounded-[32px] flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-3xl font-extrabold tracking-tighter mb-2">Computational <span class="text-indigo-500">Node</span></h2>
+                        <p class="text-gray-500 text-sm mb-8">Execute square root derivations on Fibonacci constants.</p>
+                    </div>
                     
-                    <div id="dropdownMenu" class="dropdown-content absolute top-full left-0 w-full mt-2 bg-[#0f0f0f] border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl">
-                        <div class="grid grid-cols-2 p-2 gap-1">
-                            <div onclick="selectRatio(0.236, '0.236 (Weak)')" class="p-4 hover:bg-indigo-600 rounded-xl cursor-pointer text-sm transition-colors">0.236</div>
-                            <div onclick="selectRatio(0.382, '0.382 (Moderate)')" class="p-4 hover:bg-indigo-600 rounded-xl cursor-pointer text-sm transition-colors">0.382</div>
-                            <div onclick="selectRatio(0.5, '0.500 (Base)')" class="p-4 hover:bg-indigo-600 rounded-xl cursor-pointer text-sm transition-colors">0.500</div>
-                            <div onclick="selectRatio(0.618, '0.618 (Golden)')" class="p-4 hover:bg-indigo-600 rounded-xl cursor-pointer text-sm transition-colors">0.618</div>
-                            <div onclick="selectRatio(1.618, '1.618 (Ext)')" class="p-4 hover:bg-indigo-600 rounded-xl cursor-pointer text-sm transition-colors">1.618</div>
-                            <div onclick="selectRatio(2.618, '2.618 (Hyper)')" class="p-4 hover:bg-indigo-600 rounded-xl cursor-pointer text-sm transition-colors">2.618</div>
-                            <div onclick="selectRatio(3.618, '3.618 (Ultra)')" class="p-4 hover:bg-indigo-600 rounded-xl cursor-pointer text-sm transition-colors">3.618</div>
-                            <div onclick="selectRatio(4.236, '4.236 (Max)')" class="p-4 hover:bg-indigo-600 rounded-xl cursor-pointer text-sm transition-colors">4.236</div>
+                    <div class="space-y-6">
+                        <div class="relative">
+                            <button onclick="toggleDrop()" id="dropBtn" class="w-full h-16 glass-panel rounded-2xl px-6 flex items-center justify-between group">
+                                <span id="selectedLabel" class="text-indigo-400 font-semibold tracking-tight">0.618 (Golden Ratio)</span>
+                                <svg class="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            
+                            <div id="dropMenu" class="absolute bottom-full left-0 w-full mb-2 glass-panel border border-white/10 rounded-2xl p-2 grid grid-cols-2 gap-1 z-50">
+                                <button onclick="setRatio(0.236, '0.236 (Weak)')" class="p-4 hover:bg-white/5 rounded-xl text-sm font-medium transition-all text-left">0.236</button>
+                                <button onclick="setRatio(0.382, '0.382 (Mod)')" class="p-4 hover:bg-white/5 rounded-xl text-sm font-medium transition-all text-left">0.382</button>
+                                <button onclick="setRatio(0.5, '0.500 (Mid)')" class="p-4 hover:bg-white/5 rounded-xl text-sm font-medium transition-all text-left">0.500</button>
+                                <button onclick="setRatio(0.618, '0.618 (Gold)')" class="p-4 hover:bg-white/5 rounded-xl text-sm font-medium transition-all text-left">0.618</button>
+                                <button onclick="setRatio(1.618, '1.618 (Ext)')" class="p-4 hover:bg-white/5 rounded-xl text-sm font-medium transition-all text-left">1.618</button>
+                                <button onclick="setRatio(2.618, '2.618 (Sup)')" class="p-4 hover:bg-white/5 rounded-xl text-sm font-medium transition-all text-left">2.618</button>
+                                <button onclick="setRatio(3.618, '3.618 (Ultra)')" class="p-4 hover:bg-white/5 rounded-xl text-sm font-medium transition-all text-left">3.618</button>
+                                <button onclick="setRatio(4.236, '4.236 (Max)')" class="p-4 hover:bg-white/5 rounded-xl text-sm font-medium transition-all text-left">4.236</button>
+                            </div>
                         </div>
+
+                        <input type="number" id="mainInput" placeholder="Enter Value" class="w-full h-16 bg-white/5 border border-white/10 rounded-2xl px-6 text-2xl font-bold focus:outline-none focus:border-indigo-500 transition-all placeholder:text-gray-800">
                     </div>
                 </div>
 
-                <div class="relative">
-                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 block">Value Input</label>
-                    <input type="number" id="valInput" placeholder="Enter numeric value..." class="w-full h-16 px-6 rounded-2xl text-xl font-semibold">
-                </div>
-
-                <button onclick="runCalculation()" class="w-full h-16 bg-white text-black font-black rounded-2xl text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-white/5">
-                    Execute Analysis
-                </button>
-
-                <div id="resultArea" class="hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-6 rounded-3xl border border-white/5 bg-white/[0.02]">
-                            <span class="text-[10px] text-gray-500 font-bold uppercase">Multiplied</span>
-                            <div id="resMult" class="text-2xl font-bold mt-1 tracking-tight italic text-gray-300">0</div>
-                        </div>
-                        <div class="p-6 rounded-3xl border border-indigo-500/30 bg-indigo-500/5">
-                            <span class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">Final Root</span>
-                            <div id="resRoot" class="text-4xl font-black mt-1 tracking-tighter text-white">0</div>
-                        </div>
-                    </div>
+                <div class="bento-card p-1 rounded-[32px]">
+                    <button onclick="calculate()" class="w-full h-full bg-white text-black rounded-[28px] flex flex-col items-center justify-center gap-4 hover:bg-indigo-500 hover:text-white transition-all group overflow-hidden relative">
+                        <span class="text-6xl font-black group-hover:scale-110 transition-transform">GO</span>
+                        <span class="text-xs font-black uppercase tracking-[0.3em] opacity-50">Execute Process</span>
+                    </button>
                 </div>
             </div>
+
+            <div id="results" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                <div class="bento-card p-8 rounded-[32px]">
+                    <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-4">Calculated Product</span>
+                    <div id="productOut" class="text-4xl font-light tracking-tighter">0.00</div>
+                </div>
+                <div class="bento-card p-8 rounded-[32px] relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                    </div>
+                    <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-4">Derivations (√)</span>
+                    <div id="rootOut" class="text-5xl font-black tracking-tighter text-white">0.00</div>
+                </div>
+            </div>
+
         </div>
     </main>
 
     <script>
         let currentRatio = 0.618;
 
-        function toggleDropdown() {
-            document.getElementById('dropdownMenu').classList.toggle('show');
+        function toggleDrop() {
+            document.getElementById('dropMenu').classList.toggle('open');
         }
 
-        function selectRatio(val, label) {
+        function setRatio(val, label) {
             currentRatio = val;
-            document.getElementById('selectedValue').innerText = label;
-            toggleDropdown();
+            document.getElementById('selectedLabel').innerText = label;
+            toggleDrop();
         }
 
-        function runCalculation() {
-            const inputVal = parseFloat(document.getElementById('valInput').value);
-            if(isNaN(inputVal)) return;
+        function calculate() {
+            const input = document.getElementById('mainInput').value;
+            if (!input) return;
 
-            const product = currentRatio * inputVal;
+            const product = currentRatio * input;
             const root = Math.sqrt(product);
 
-            // Update UI
-            document.getElementById('resMult').innerText = product.toFixed(3);
-            document.getElementById('resRoot').innerText = root.toFixed(5);
-            document.getElementById('resultArea').classList.remove('hidden');
+            // UI Update
+            document.getElementById('productOut').innerText = product.toLocaleString(undefined, {minimumFractionDigits: 3});
+            document.getElementById('rootOut').innerText = root.toLocaleString(undefined, {minimumFractionDigits: 5});
+            document.getElementById('results').classList.remove('hidden');
 
-            // Add to History
-            addToHistory(currentRatio, inputVal, root);
-        }
-
-        function addToHistory(r, i, res) {
+            // History Update
             const list = document.getElementById('historyList');
-            const empty = document.getElementById('emptyMsg');
-            if(empty) empty.remove();
-
-            const item = document.createElement('div');
-            item.className = "history-item p-4 rounded-xl";
-            item.innerHTML = `
-                <div class="flex justify-between items-center mb-1">
-                    <span class="text-[10px] text-indigo-500 font-bold">RATIO ${r}</span>
-                    <span class="text-[10px] text-gray-600 font-mono">${new Date().toLocaleTimeString()}</span>
+            if (list.innerText.includes("No active sessions")) list.innerHTML = '';
+            
+            const div = document.createElement('div');
+            div.className = "p-4 glass-panel rounded-2xl border border-white/5 hover:border-indigo-500/50 transition-all cursor-pointer group";
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-[10px] font-bold text-indigo-400 uppercase">Ratio: ${currentRatio}</span>
+                    <span class="text-[9px] font-mono text-gray-600">${new Date().toLocaleTimeString()}</span>
                 </div>
-                <div class="text-sm font-semibold tracking-tight">√(${r} × ${i}) = ${res.toFixed(3)}</div>
+                <div class="text-sm font-bold tracking-tight text-white/80 group-hover:text-white">√ Result: ${root.toFixed(4)}</div>
             `;
-            list.prepend(item);
+            list.prepend(div);
         }
 
-        // Close dropdown when clicking outside
-        window.onclick = function(event) {
-            if (!event.target.closest('#dropdownBtn')) {
-                document.getElementById('dropdownMenu').classList.remove('show');
-            }
+        function clearHistory() {
+            document.getElementById('historyList').innerHTML = '<div class="text-gray-700 text-xs p-4 text-center border border-dashed border-white/5 rounded-xl">No active sessions</div>';
         }
+
+        // Close dropdown on outside click
+        window.addEventListener('click', (e) => {
+            if (!document.getElementById('dropBtn').contains(e.target)) {
+                document.getElementById('dropMenu').classList.remove('open');
+            }
+        });
     </script>
 </body>
 </html>
