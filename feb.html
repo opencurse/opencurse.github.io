@@ -3,102 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FibRatio Pro | Precision Calculator</title>
+    <title>FibRatio | Ultra Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #000000;
+            --card-bg: rgba(10, 10, 10, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #6366f1;
+        }
+
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #050505;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(147, 51, 234, 0.15) 0px, transparent 50%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #e5e7eb;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: #fafafa;
+            overflow: hidden; /* Clean look */
         }
-        .main-card {
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border-radius: 32px;
+
+        /* Animated Mesh Background */
+        .mesh-gradient {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 40%);
+            filter: blur(80px);
+        }
+
+        /* Border Beam Effect (Next.js style) */
+        .premium-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
             position: relative;
-            overflow: hidden;
         }
-        .main-card::before {
+
+        .premium-card::after {
             content: "";
             position: absolute;
-            top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            inset: -1px;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            border-radius: 24px;
+            z-index: -1;
+            pointer-events: none;
         }
+
         input, select {
-            background: rgba(255, 255, 255, 0.05) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: white !important;
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
+
         input:focus, select:focus {
-            border-color: #6366f1 !important;
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+            background: rgba(255, 255, 255, 0.07) !important;
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.15) !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+            background: white;
+            color: black;
+            transition: all 0.3s;
+        }
+
+        .btn-shine:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+            background: #f0f0f0;
+        }
+
+        /* Floating Animation */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+
+        .result-pill {
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+            border: 1px solid rgba(255,255,255,0.05);
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="main-card w-full max-w-lg p-10 mx-4">
-        <div class="flex justify-center mb-6">
-            <span class="px-3 py-1 text-[10px] font-bold tracking-widest uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">
-                Fibonacci Ratio Engine v2.0
-            </span>
-        </div>
+    <div class="mesh-gradient"></div>
 
-        <h1 class="text-4xl font-extrabold text-center mb-2 tracking-tight">
-            Golden <span class="text-indigo-500">Calculator.</span>
-        </h1>
-        <p class="text-gray-400 text-center text-sm mb-10">Select a Fibonacci ratio and compute the square root.</p>
-
-        <div class="space-y-6">
-            <div class="group">
-                <label class="text-xs font-bold text-gray-500 ml-1 mb-2 block uppercase tracking-widest">Select Ratio (Level)</label>
-                <select id="fibRatio" class="w-full h-14 px-4 rounded-2xl outline-none transition-all appearance-none cursor-pointer">
-                    <option value="0.236">0.236 (Weak)</option>
-                    <option value="0.382">0.382 (Moderate)</option>
-                    <option value="0.5">0.500 (Mid-Point)</option>
-                    <option value="0.618" selected>0.618 (Golden Ratio)</option>
-                    <option value="0.786">0.786 (Deep)</option>
-                    <option value="1.0">1.000 (Full)</option>
-                    <option value="1.618">1.618 (Golden Extension)</option>
-                    <option value="2.618">2.618 (Super Extension)</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="text-xs font-bold text-gray-500 ml-1 mb-2 block uppercase tracking-widest">Your Number</label>
-                <input type="number" id="userInput" placeholder="e.g. 100" 
-                    class="w-full h-14 px-4 rounded-2xl outline-none transition-all">
-            </div>
-
-            <button onclick="calculate()" class="w-full h-14 bg-white text-black font-bold rounded-2xl hover:bg-indigo-500 hover:text-white transition-all duration-300 transform active:scale-95 shadow-xl shadow-indigo-500/10">
-                Compute Result
-            </button>
-        </div>
-
-        <div id="displayArea" class="hidden mt-10 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div class="h-px bg-gradient-to-r from-transparent via-gray-800 to-transparent"></div>
+    <div class="premium-card w-full max-w-lg p-1 space-y-1 float-anim">
+        <div class="bg-black/40 rounded-[23px] p-8 md:p-12">
             
-            <div class="grid grid-cols-2 gap-4">
-                <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <p class="text-[10px] text-gray-500 uppercase font-bold">Product</p>
-                    <p id="productResult" class="text-xl font-semibold text-white">0.00</p>
+            <div class="flex items-center justify-between mb-12">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <span class="font-bold text-sm text-white">F</span>
+                    </div>
+                    <span class="text-sm font-semibold tracking-tight text-white/90">FIB-RATIO PRO</span>
                 </div>
-                <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-                    <p class="text-[10px] text-indigo-400 uppercase font-bold">Square Root</p>
-                    <p id="rootResult" class="text-2xl font-bold text-indigo-400 italic">0.00</p>
+                <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            </div>
+
+            <div class="mb-10 text-left">
+                <h1 class="text-4xl font-extrabold tracking-tighter text-white mb-3">
+                    Quantum <span class="text-indigo-400">Ratios.</span>
+                </h1>
+                <p class="text-gray-500 text-sm font-medium leading-relaxed">
+                    Compute Fibonacci-weighted results with square root precision for modern technical analysis.
+                </p>
+            </div>
+
+            <div class="space-y-5">
+                <div class="space-y-2">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Select Coefficient</label>
+                    <select id="fibRatio" class="w-full h-14 px-5 rounded-2xl outline-none cursor-pointer text-sm font-medium">
+                        <option value="0.236">Level 0.236 — Minimal</option>
+                        <option value="0.382">Level 0.382 — Conservative</option>
+                        <option value="0.5">Level 0.500 — Equilibrium</option>
+                        <option value="0.618" selected>Level 0.618 — Golden Mean</option>
+                        <option value="0.786">Level 0.786 — Deep</option>
+                        <option value="1.0">Level 1.000 — Unity</option>
+                        <option value="1.618">Level 1.618 — Extension</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Input Variable</label>
+                    <input type="number" id="userInput" placeholder="0.00" 
+                        class="w-full h-14 px-5 rounded-2xl outline-none text-lg font-semibold tracking-tight">
+                </div>
+
+                <button onclick="calculate()" class="btn-shine w-full h-14 rounded-2xl font-bold text-sm uppercase tracking-widest mt-4">
+                    Run Analysis
+                </button>
+            </div>
+
+            <div id="displayArea" class="hidden mt-10 space-y-6">
+                <div class="h-px bg-white/10"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="result-pill p-5 rounded-2xl">
+                        <p class="text-[10px] text-gray-500 uppercase font-black mb-1">Product</p>
+                        <p id="productResult" class="text-2xl font-bold tracking-tighter">0.00</p>
+                    </div>
+                    <div class="bg-indigo-600/10 border border-indigo-500/20 p-5 rounded-2xl">
+                        <p class="text-[10px] text-indigo-400 uppercase font-black mb-1">Square Root</p>
+                        <p id="rootResult" class="text-3xl font-extrabold text-indigo-300 tracking-tighter">0.00</p>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="fixed bottom-8 text-gray-600 text-[11px] font-bold tracking-widest uppercase opacity-50">
+        Engineered for Excellence &bull; 2026
     </div>
 
     <script>
@@ -107,18 +171,31 @@
             const num = parseFloat(document.getElementById('userInput').value);
             const display = document.getElementById('displayArea');
 
-            if (isNaN(num)) {
-                alert("Please enter a valid number!");
-                return;
-            }
+            if (isNaN(num)) return;
 
             const product = ratio * num;
             const root = Math.sqrt(product);
 
-            document.getElementById('productResult').innerText = product.toFixed(3);
-            document.getElementById('rootResult').innerText = root.toFixed(4);
+            // Animate Numbers
+            animateValue("productResult", 0, product, 500);
+            animateValue("rootResult", 0, root, 800);
             
             display.classList.remove('hidden');
+            display.classList.add('animate-in', 'fade-in', 'slide-in-from-bottom-5', 'duration-700');
+        }
+
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = (progress * (end - start) + start).toFixed(4);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
         }
     </script>
 </body>
